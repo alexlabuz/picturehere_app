@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PictureHere</string>
+    <string name="preference_app">preference_app</string>
+    <string name="token">token</string>
 </resources>

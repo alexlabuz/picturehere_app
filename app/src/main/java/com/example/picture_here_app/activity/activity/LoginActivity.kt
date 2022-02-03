@@ -1,5 +1,7 @@
 package com.example.picture_here_app.activity.activity
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -12,12 +14,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class LoginActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityLoginBinding
+    lateinit var preference : SharedPreferences
     val loginFragment = LoginFragment()
     val registerFragment = RegisterFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
+        preference = getSharedPreferences(getString(R.string.preference_app), Context.MODE_PRIVATE)
 
         binding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
 
