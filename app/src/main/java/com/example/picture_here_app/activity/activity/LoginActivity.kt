@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
 import com.example.picture_here_app.activity.fragment.LoginFragment
@@ -15,8 +16,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class LoginActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityLoginBinding
     lateinit var preference : SharedPreferences
-    val loginFragment = LoginFragment()
     val registerFragment = RegisterFragment()
+    var loginFragment = LoginFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,11 @@ class LoginActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItem
         setContentView(binding.root)
     }
 
-    private fun loadFragment(fragment: Fragment?) : Boolean{
+    fun load(enabled: Boolean){
+        binding.load.visibility = if (enabled) View.VISIBLE else View.GONE
+    }
+
+    fun loadFragment(fragment: Fragment?) : Boolean{
         if(fragment != null){
             supportFragmentManager
                 .beginTransaction()
