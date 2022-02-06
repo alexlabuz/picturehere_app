@@ -57,5 +57,17 @@
             android:text="TextView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/post_cell_pseudo_text" />
+
+        <ImageButton
+            android:id="@+id/post_cell_delete_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            app:layout_constraintBottom_toTopOf="@+id/post_cell_message_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.516"
+            app:srcCompat="@drawable/ic_baseline_delete_24"
+            app:tint="@color/danger" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

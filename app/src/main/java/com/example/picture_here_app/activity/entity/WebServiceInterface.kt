@@ -8,10 +8,7 @@ import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.entity.user.Utilisateur
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface WebServiceInterface {
     @POST("api/user/login")
@@ -25,4 +22,10 @@ interface WebServiceInterface {
 
     @GET("api/post/thread")
     fun thread(@Header("Authorization") authorization: String) : Call<List<Post>>
+
+    @GET("api/post/user/{id}")
+    fun postByUser(@Header("Authorization") authorization: String, @Path("id") id : Int) : Call<List<Post>>
+
+    @GET("api/post/delete/{id}")
+    fun deletePost(@Header("Authorization") authorization: String, @Path("id") id : Int) : Call<MessageResponse>
 }
