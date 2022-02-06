@@ -49,7 +49,7 @@ class RegisterFragment : Fragment(){
         val userRegister = UserRegister()
         userRegister.username = binding.editRegisterUsername.text.toString()
         userRegister.pseudo = binding.editRegisterPseudo.text.toString()
-        userRegister.password = binding.editRegisterPseudo.text.toString()
+        userRegister.password = binding.editRegisterPassword.text.toString()
 
         val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
         val callRegister = webServiceInterface.register(userRegister)
