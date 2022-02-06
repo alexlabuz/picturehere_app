@@ -8,8 +8,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
-import com.example.picture_here_app.activity.fragment.LoginFragment
-import com.example.picture_here_app.activity.fragment.RegisterFragment
+import com.example.picture_here_app.activity.fragment.login.LoginFragment
+import com.example.picture_here_app.activity.fragment.login.RegisterFragment
 import com.example.picture_here_app.databinding.ActivityLoginBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -24,7 +24,7 @@ class LoginActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItem
         binding = ActivityLoginBinding.inflate(layoutInflater)
         preference = getSharedPreferences(getString(R.string.preference_app), Context.MODE_PRIVATE)
 
-        binding.bottomNavigationView.setOnNavigationItemSelectedListener(this)
+        binding.bottomNavigationLogin.setOnNavigationItemSelectedListener(this)
 
         loadFragment(loginFragment)
         setContentView(binding.root)

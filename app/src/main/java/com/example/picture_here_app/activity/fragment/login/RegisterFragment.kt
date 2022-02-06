@@ -1,4 +1,4 @@
-package com.example.picture_here_app.activity.fragment
+package com.example.picture_here_app.activity.fragment.login
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,9 +9,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
-import com.example.picture_here_app.activity.WebServiceInterface
+import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.activity.LoginActivity
-import com.example.picture_here_app.activity.entity.register.UserRegister
+import com.example.picture_here_app.activity.entity.login.UserRegister
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.singleton.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentRegisterBinding
@@ -19,6 +19,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Response
+import java.lang.Exception
 
 class RegisterFragment : Fragment(){
     private lateinit var binding: FragmentRegisterBinding
@@ -55,18 +56,23 @@ class RegisterFragment : Fragment(){
 
         callRegister.enqueue(object : retrofit2.Callback<MessageResponse> {
             override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
-                if(response.isSuccessful){
-                    val message: MessageResponse? = response.body()
-                    loginActivity.loadFragment(loginActivity.loginFragment)
-                    emptyEditText()
-                    Toast.makeText(activity, message?.message ?: "Inscription terminée", Toast.LENGTH_LONG).show()
-                }else{
-                    val gson = Gson()
-                    val type = object : TypeToken<MessageResponse>() {}.type
-                    val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
-                    displayMessage(errorBody.message, true)
+                try{
+                    if(response.isSuccessful){
+                        val message: MessageResponse? = response.body()
+                        loginActivity.loadFragment(loginActivity.loginFragment)
+                        emptyEditText()
+                        Toast.makeText(activity, message?.message ?: "Inscription terminée", Toast.LENGTH_LONG).show()
+                    }else{
+                        val gson = Gson()
+                        val type = object : TypeToken<MessageResponse>() {}.type
+                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        displayMessage(errorBody.message, true)
+                    }
+                } catch (e: Exception) {
+                    displayMessage("Une erreur s'est produite", true)
+                } finally {
+                    loginActivity.load(false)
                 }
-                loginActivity.load(false)
             }
 
             override fun onFailure(call: Call<MessageResponse>, t: Throwable) {

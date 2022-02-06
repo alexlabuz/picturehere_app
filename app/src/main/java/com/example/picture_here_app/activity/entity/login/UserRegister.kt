@@ -1,4 +1,4 @@
-package com.example.picture_here_app.activity.entity.register
+package com.example.picture_here_app.activity.entity.login
 
 class UserRegister {
     lateinit var username : String

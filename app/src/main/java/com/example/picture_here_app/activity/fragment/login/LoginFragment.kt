@@ -1,4 +1,4 @@
-package com.example.picture_here_app.activity.fragment
+package com.example.picture_here_app.activity.fragment.login
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -10,7 +10,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
-import com.example.picture_here_app.activity.WebServiceInterface
+import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.activity.LoginActivity
 import com.example.picture_here_app.activity.entity.login.Token
@@ -22,6 +22,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Response
+import java.lang.Exception
 
 @SuppressLint("SetTextI18n")
 class LoginFragment : Fragment() {
@@ -51,19 +52,24 @@ class LoginFragment : Fragment() {
 
         callLogin.enqueue(object : retrofit2.Callback<Token> {
             override fun onResponse(call: Call<Token>, response: Response<Token>) {
-                if(response.isSuccessful){
-                    val data : Token? = response.body()
-                    loginActivity.preference.edit()
-                        ?.putString(getString(R.string.token), data!!.token)
-                        ?.apply()
-                    openAppActivity()
-                }else{
-                    val gson = Gson()
-                    val type = object : TypeToken<MessageResponse>() {}.type
-                    val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
-                    displayMessage(errorBody.message, true)
+                try{
+                    if(response.isSuccessful){
+                        val data : Token? = response.body()
+                        loginActivity.preference.edit()
+                            ?.putString(getString(R.string.token), data!!.token)
+                            ?.apply()
+                        openAppActivity()
+                    }else{
+                        val gson = Gson()
+                        val type = object : TypeToken<MessageResponse>() {}.type
+                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        displayMessage(errorBody.message, true)
+                    }
+                } catch (e: Exception) {
+                    displayMessage("Une erreur s'est produite", true)
+                } finally {
+                    loginActivity.load(false)
                 }
-                loginActivity.load(false)
             }
 
             override fun onFailure(call: Call<Token>, t: Throwable) {
