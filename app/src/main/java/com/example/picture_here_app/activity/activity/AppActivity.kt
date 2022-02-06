@@ -60,7 +60,7 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                         val gson = Gson()
                         val type = object : TypeToken<MessageResponse>() {}.type
                         val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
-                        if(errorBody.message == "JWT Token not found"){
+                        if(errorBody.message == "Expired JWT Token"){
                             Toast.makeText(this@AppActivity, "Vous avez été déconnecté", Toast.LENGTH_SHORT).show()
                             logout()
                         }

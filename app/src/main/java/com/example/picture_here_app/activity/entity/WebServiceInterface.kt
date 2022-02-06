@@ -3,6 +3,7 @@ package com.example.picture_here_app.activity.entity
 import com.example.picture_here_app.activity.entity.login.Token
 import com.example.picture_here_app.activity.entity.login.UserLogin
 import com.example.picture_here_app.activity.entity.login.UserRegister
+import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.entity.user.Utilisateur
@@ -21,4 +22,7 @@ interface WebServiceInterface {
 
     @GET("api/profil/connected")
     fun connected(@Header("Authorization") authorization: String) : Call<User>
+
+    @GET("api/post/thread")
+    fun thread(@Header("Authorization") authorization: String) : Call<List<Post>>
 }
