@@ -1,18 +1,22 @@
 package com.example.picture_here_app.activity.activity
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
-import com.example.picture_here_app.activity.OnClickBtnPost
 import com.example.picture_here_app.activity.entity.WebServiceInterface
-import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.fragment.app.ProfilFragment
@@ -27,20 +31,23 @@ import retrofit2.Response
 import java.lang.Exception
 
 
-class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener, OnClickBtnPost {
+class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     private lateinit var binding: ActivityAppBinding
     lateinit var preference: SharedPreferences
     val threadFragment = ThreadFragment()
     val profilFragment = ProfilFragment()
+    lateinit var token: String
 
     lateinit var user: User
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppBinding.inflate(layoutInflater)
         load(true)
         preference = getSharedPreferences(getString(R.string.preference_app), Context.MODE_PRIVATE)
         binding.bottomNavigationApp.setOnNavigationItemSelectedListener(this)
+        token = preference.getString(getString(R.string.token), null).toString()
         loadFragment(threadFragment)
 
         getData()
@@ -48,7 +55,6 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
     }
 
     fun getData(){
-        val token = preference.getString(getString(R.string.token), "")
         val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
         val callLogin = webServiceInterface.connected("Bearer $token")
 
@@ -92,11 +98,12 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         binding.load.visibility = if (enabled) View.VISIBLE else View.GONE
     }
 
-    fun loadFragment(fragment: Fragment?) : Boolean{
+    private fun loadFragment(fragment: Fragment?) : Boolean{
         if(fragment != null){
             supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.frame_layout_app, fragment)
+                .setReorderingAllowed(true)
                 .commit()
             return true
         }
@@ -111,38 +118,5 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
             return loadFragment(profilFragment)
         }
         return false
-    }
-
-    override fun onClickDeletePost(post: Post) {
-
-        profilFragment.listPost.remove(post)
-
-//        val token = preference.getString(getString(R.string.token), "")
-//        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-//        val callLogin = webServiceInterface.deletePost("Bearer $token", post.id)
-//
-//        callLogin.enqueue(object : retrofit2.Callback<MessageResponse>{
-//            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
-//                try{
-//                    if(response.isSuccessful){
-//                        val data : MessageResponse? = response.body()
-//                        Toast.makeText(this@AppActivity, data!!.message, Toast.LENGTH_SHORT).show()
-//                    }else{
-//                        val gson = Gson()
-//                        val type = object : TypeToken<MessageResponse>() {}.type
-//                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
-//                        Toast.makeText(this@AppActivity, errorBody.message, Toast.LENGTH_SHORT).show()
-//                    }
-//                } catch (e: Exception) {
-//                    Toast.makeText(this@AppActivity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
-//                } finally {
-//                    load(false)
-//                }
-//            }
-//            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
-//                Toast.makeText(this@AppActivity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
-//                load(false)
-//            }
-//        })
     }
 }

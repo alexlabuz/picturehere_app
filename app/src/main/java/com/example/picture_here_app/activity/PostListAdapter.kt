@@ -29,7 +29,7 @@ class PostHolder(postCellBinding: PostCellBinding) : RecyclerView.ViewHolder(pos
     }
 }
 
-class PostListAdapter(postList: List<Post>, val deleted: Boolean = true, onClickBtnPost: OnClickBtnPost) : RecyclerView.Adapter<PostHolder>(){
+class PostListAdapter(postList: List<Post>, val deleted: Boolean = true, onClickBtnPost: OnClickBtnPost? = null) : RecyclerView.Adapter<PostHolder>(){
     private val dataSource = postList
     private val listener = onClickBtnPost
 
@@ -42,7 +42,7 @@ class PostListAdapter(postList: List<Post>, val deleted: Boolean = true, onClick
         holder.bindItems(dataSource[position], deleted)
         holder.deleteBtn.setOnClickListener(object : View.OnClickListener{
             override fun onClick(v: View?) {
-                listener.onClickDeletePost(dataSource[holder.adapterPosition])
+                listener?.onClickDeletePost(dataSource[holder.adapterPosition])
             }
         })
     }

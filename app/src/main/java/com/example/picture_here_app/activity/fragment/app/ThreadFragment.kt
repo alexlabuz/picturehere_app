@@ -1,5 +1,6 @@
 package com.example.picture_here_app.activity.fragment.app
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -26,7 +27,7 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var binding: FragmentThreadBinding
     private lateinit var appActivity: AppActivity
 
-    private var listPost: List<Post> = listOf()
+    private var listPost: MutableList<Post> = mutableListOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentThreadBinding.inflate(inflater)
@@ -34,7 +35,7 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         binding.threadList.setHasFixedSize(true)
         binding.threadList.layoutManager = LinearLayoutManager(activity)
-        binding.threadList.adapter = PostListAdapter(listPost, false, onClickBtnPost = appActivity)
+        binding.threadList.adapter = PostListAdapter(listPost, false)
 
         getPost()
 
@@ -45,17 +46,18 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun getPost(){
-        val token = appActivity.preference.getString(getString(R.string.token), "")
         val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callLogin = webServiceInterface.thread("Bearer $token")
+        val callLogin = webServiceInterface.thread("Bearer ${appActivity.token}")
 
         callLogin.enqueue(object : retrofit2.Callback<List<Post>>{
+            @SuppressLint("NotifyDataSetChanged")
             override fun onResponse(call: Call<List<Post>>, response: Response<List<Post>>) {
                 try{
                     if(response.isSuccessful){
                         val data : List<Post>? = response.body()
-                        listPost = data!!
-                        binding.threadList.adapter = PostListAdapter(listPost, false, onClickBtnPost = appActivity)
+                        listPost.clear()
+                        listPost.addAll(data as MutableList<Post>)
+                        binding.threadList.adapter?.notifyDataSetChanged()
                     }else{
                         val gson = Gson()
                         val type = object : TypeToken<MessageResponse>() {}.type

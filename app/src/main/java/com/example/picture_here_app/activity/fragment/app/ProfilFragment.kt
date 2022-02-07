@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.picture_here_app.R
+import com.example.picture_here_app.activity.OnClickBtnPost
 import com.example.picture_here_app.activity.PostListAdapter
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.entity.WebServiceInterface
@@ -18,6 +19,7 @@ import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.singleton.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentProfilBinding
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
@@ -25,9 +27,10 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClickBtnPost {
     private lateinit var binding: FragmentProfilBinding
     private lateinit var appActivity: AppActivity
+    val fragment = this
 
     var listPost: MutableList<Post> = mutableListOf()
 
@@ -44,7 +47,7 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         binding.profilList.setHasFixedSize(true)
         binding.profilList.layoutManager = LinearLayoutManager(activity)
-        binding.profilList.adapter = PostListAdapter(listPost, onClickBtnPost = appActivity)
+        binding.profilList.adapter = PostListAdapter(listPost, onClickBtnPost = this)
 
         binding.profilSwipeLoad.setOnRefreshListener(this)
         binding.profilSwipeLoad.isRefreshing = true
@@ -60,17 +63,18 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun getPost(){
-        val token = appActivity.preference.getString(getString(R.string.token), "")
         val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callLogin = webServiceInterface.postByUser("Bearer $token", appActivity.user.utilisateur.id)
+        val callLogin = webServiceInterface.postByUser("Bearer ${appActivity.token}", appActivity.user.utilisateur.id)
 
         callLogin.enqueue(object : retrofit2.Callback<List<Post>>{
+            @SuppressLint("NotifyDataSetChanged")
             override fun onResponse(call: Call<List<Post>>, response: Response<List<Post>>) {
                 try{
                     if(response.isSuccessful){
                         val data : List<Post>? = response.body()
-                        listPost = (data as MutableList<Post>?)!!
-                        binding.profilList.adapter = PostListAdapter(listPost, onClickBtnPost = appActivity)
+                        listPost.clear()
+                        listPost.addAll(data as MutableList<Post>)
+                        binding.profilList.adapter?.notifyDataSetChanged()
                     }else{
                         val gson = Gson()
                         val type = object : TypeToken<MessageResponse>() {}.type
@@ -94,5 +98,35 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onRefresh() {
         getPost()
         getDataProfil()
+    }
+
+    override fun onClickDeletePost(post: Post) {
+        Toast.makeText(activity, "Suppression en cours ...", Toast.LENGTH_SHORT).show()
+        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
+        val callLogin = webServiceInterface.deletePost("Bearer ${appActivity.token}", post.id)
+
+        callLogin.enqueue(object : retrofit2.Callback<MessageResponse>{
+            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                try{
+                    if(response.isSuccessful){
+                        val data : MessageResponse? = response.body()
+                        val i = listPost.indexOf(post)
+                        listPost.remove(post)
+                        binding.profilList.adapter?.notifyItemRemoved(i)
+                        Toast.makeText(activity, data!!.message, Toast.LENGTH_SHORT).show()
+                    }else{
+                        val gson = Gson()
+                        val type = object : TypeToken<MessageResponse>() {}.type
+                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        Toast.makeText(activity, errorBody.message, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(activity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                Toast.makeText(activity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
