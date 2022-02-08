@@ -6,7 +6,6 @@ import com.example.picture_here_app.activity.entity.login.UserRegister
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
-import com.example.picture_here_app.activity.entity.user.Utilisateur
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -28,4 +27,12 @@ interface WebServiceInterface {
 
     @GET("api/post/delete/{id}")
     fun deletePost(@Header("Authorization") authorization: String, @Path("id") id : Int) : Call<MessageResponse>
+
+    @Multipart
+    @POST("api/post/add")
+    fun sendPost(
+        @Header("Authorization") authorization: String,
+        @Part("picture") picture: Any,
+        @Part("post") post: Post
+    ) : Call<MessageResponse>
 }

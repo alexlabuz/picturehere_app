@@ -30,7 +30,6 @@ import java.util.*
 class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClickBtnPost {
     private lateinit var binding: FragmentProfilBinding
     private lateinit var appActivity: AppActivity
-    val fragment = this
 
     var listPost: MutableList<Post> = mutableListOf()
 
@@ -42,8 +41,7 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClick
             appActivity.logout()
         }
 
-        getDataProfil()
-        getPost()
+        onRefresh()
 
         binding.profilList.setHasFixedSize(true)
         binding.profilList.layoutManager = LinearLayoutManager(activity)
@@ -96,8 +94,10 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClick
     }
 
     override fun onRefresh() {
-        getPost()
-        getDataProfil()
+        try {
+            getDataProfil()
+            getPost()
+        }catch (e: Exception){}
     }
 
     override fun onClickDeletePost(post: Post) {

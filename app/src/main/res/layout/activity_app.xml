@@ -38,6 +38,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:contentDescription="Ajouter un post"
+        android:onClick="openFilePicker"
         app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_app"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/ic_baseline_send_24" />

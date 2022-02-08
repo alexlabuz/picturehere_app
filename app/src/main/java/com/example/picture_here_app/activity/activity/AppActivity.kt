@@ -1,34 +1,44 @@
 package com.example.picture_here_app.activity.activity
 
 import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
 import com.example.picture_here_app.activity.entity.WebServiceInterface
+import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.fragment.app.ProfilFragment
 import com.example.picture_here_app.activity.fragment.app.ThreadFragment
 import com.example.picture_here_app.activity.singleton.RetrofitSingleton
 import com.example.picture_here_app.databinding.ActivityAppBinding
+import com.example.picture_here_app.databinding.DialogSendPostBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.squareup.picasso.Picasso
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
-import java.lang.Exception
+import java.io.File
 
 
 class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
@@ -40,10 +50,15 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
 
     lateinit var user: User
 
+    private val pictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) openDialogSendPost(result.data?.data!!)
+    }
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppBinding.inflate(layoutInflater)
+
         load(true)
         preference = getSharedPreferences(getString(R.string.preference_app), Context.MODE_PRIVATE)
         binding.bottomNavigationApp.setOnNavigationItemSelectedListener(this)
@@ -58,7 +73,7 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
         val callLogin = webServiceInterface.connected("Bearer $token")
 
-        callLogin.enqueue(object : retrofit2.Callback<User>{
+        callLogin.enqueue(object : Callback<User>{
             override fun onResponse(call: Call<User>, response: Response<User>) {
                 try{
                     if(response.isSuccessful){
@@ -87,6 +102,65 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         })
     }
 
+    fun openFilePicker(view: View? = null){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            return requestPermissions(listOf<String>(Manifest.permission.READ_EXTERNAL_STORAGE).toTypedArray(), 0)
+
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.type = "image/*"
+        pictureLauncher.launch(intent)
+    }
+
+    private fun openDialogSendPost(uri: Uri){
+        val dialogSendPostBinding: DialogSendPostBinding = DialogSendPostBinding.inflate(layoutInflater)
+        AlertDialog.Builder(this)
+            .setTitle("Publier une photo")
+            .setView(dialogSendPostBinding.root)
+            .setPositiveButton("Publier") { _, _ ->
+                run {
+                    sendPost(uri, dialogSendPostBinding.editMessagePost.text.toString())
+                }
+            }
+            .setNegativeButton("Retour", null)
+            .show()
+
+        Picasso.get().load(uri).into(dialogSendPostBinding.imagePost)
+    }
+
+    private fun sendPost(uri: Uri, message: String){
+        val post = Post()
+        post.message = message
+
+        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
+        val callLogin = webServiceInterface.sendPost("Bearer $token", uri, post)
+
+        callLogin.enqueue(object : Callback<MessageResponse>{
+            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                try{
+                    if(response.isSuccessful){
+                        val data : MessageResponse? = response.body()
+                        Toast.makeText(this@AppActivity, data?.message, Toast.LENGTH_SHORT).show()
+                    }else{
+                        val gson = Gson()
+                        val type = object : TypeToken<MessageResponse>() {}.type
+                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        Toast.makeText(this@AppActivity, errorBody.message, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@AppActivity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+                } finally {
+                    load(false)
+                }
+            }
+
+            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                Toast.makeText(this@AppActivity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
     fun logout(){
         preference.edit().remove(getString(R.string.token)).apply()
         val intent = Intent(this, LoginActivity::class.java)
@@ -108,6 +182,19 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
             return true
         }
         return false
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when(requestCode){
+            0 -> {
+                if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    openFilePicker(null)
+                }else{
+                    Toast.makeText(this, "Permission de stockage non autorisé", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
