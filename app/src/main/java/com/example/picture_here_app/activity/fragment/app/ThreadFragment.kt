@@ -1,7 +1,6 @@
 package com.example.picture_here_app.activity.fragment.app
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +9,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.picture_here_app.R
 import com.example.picture_here_app.activity.PostListAdapter
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
-import com.example.picture_here_app.activity.singleton.RetrofitSingleton
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentThreadBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -46,8 +44,7 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun getPost(){
-        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callLogin = webServiceInterface.thread("Bearer ${appActivity.token}")
+        val callLogin = RetrofitSingleton.getRetrofit().thread("Bearer ${appActivity.token}")
 
         callLogin.enqueue(object : retrofit2.Callback<List<Post>>{
             @SuppressLint("NotifyDataSetChanged")

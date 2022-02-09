@@ -13,7 +13,7 @@ import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.activity.LoginActivity
 import com.example.picture_here_app.activity.entity.login.UserRegister
 import com.example.picture_here_app.activity.entity.response.MessageResponse
-import com.example.picture_here_app.activity.singleton.RetrofitSingleton
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentRegisterBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -51,8 +51,7 @@ class RegisterFragment : Fragment(){
         userRegister.pseudo = binding.editRegisterPseudo.text.toString()
         userRegister.password = binding.editRegisterPassword.text.toString()
 
-        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callRegister = webServiceInterface.register(userRegister)
+        val callRegister = RetrofitSingleton.getRetrofit().register(userRegister)
 
         callRegister.enqueue(object : retrofit2.Callback<MessageResponse> {
             override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {

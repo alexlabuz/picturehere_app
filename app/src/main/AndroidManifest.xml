@@ -13,10 +13,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Picture_here_app">
         <activity
+            android:name=".activity.activity.AccountActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.activity.StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

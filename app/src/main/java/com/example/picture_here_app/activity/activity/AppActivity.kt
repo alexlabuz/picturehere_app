@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -25,7 +24,8 @@ import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.fragment.app.ProfilFragment
 import com.example.picture_here_app.activity.fragment.app.ThreadFragment
-import com.example.picture_here_app.activity.singleton.RetrofitSingleton
+import com.example.picture_here_app.activity.service.GetFile
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.ActivityAppBinding
 import com.example.picture_here_app.databinding.DialogSendPostBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -38,7 +38,6 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.File
 
 
 class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
@@ -70,8 +69,7 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
     }
 
     fun getData(){
-        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callLogin = webServiceInterface.connected("Bearer $token")
+        val callLogin = RetrofitSingleton.getRetrofit().connected("Bearer $token")
 
         callLogin.enqueue(object : Callback<User>{
             override fun onResponse(call: Call<User>, response: Response<User>) {
@@ -132,8 +130,13 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         val post = Post()
         post.message = message
 
-        val webServiceInterface = RetrofitSingleton.getRetrofit().create(WebServiceInterface::class.java)
-        val callLogin = webServiceInterface.sendPost("Bearer $token", uri, post)
+        val file = GetFile.getFile(uri, this)
+
+        val requestFile = RequestBody.create(MediaType.parse(contentResolver.getType(uri)!!), file)
+        val postPicture = MultipartBody.Part.createFormData("picture", file.name, requestFile)
+
+        load(true)
+        val callLogin = RetrofitSingleton.getRetrofit().sendPost("Bearer $token", postPicture, post)
 
         callLogin.enqueue(object : Callback<MessageResponse>{
             override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
@@ -156,8 +159,8 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
 
             override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
                 Toast.makeText(this@AppActivity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+                load(false)
             }
-
         })
     }
 
