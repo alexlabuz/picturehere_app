@@ -13,8 +13,8 @@ import com.example.picture_here_app.activity.PostListAdapter
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
-import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.activity.service.MessageResponseGet
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentThreadBinding
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
