@@ -11,13 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.picture_here_app.activity.PostListAdapter
 import com.example.picture_here_app.activity.activity.AppActivity
-import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.service.RetrofitSingleton
+import com.example.picture_here_app.activity.service.MessageResponseGet
 import com.example.picture_here_app.databinding.FragmentThreadBinding
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Response
 
@@ -45,7 +44,6 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun getPost(){
         val callLogin = RetrofitSingleton.getRetrofit().thread("Bearer ${appActivity.token}")
-
         callLogin.enqueue(object : retrofit2.Callback<List<Post>>{
             @SuppressLint("NotifyDataSetChanged")
             override fun onResponse(call: Call<List<Post>>, response: Response<List<Post>>) {
@@ -56,20 +54,18 @@ class ThreadFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         listPost.addAll(data as MutableList<Post>)
                         binding.threadList.adapter?.notifyDataSetChanged()
                     }else{
-                        val gson = Gson()
-                        val type = object : TypeToken<MessageResponse>() {}.type
-                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        val errorBody: MessageResponse = MessageResponseGet.getMessageResponse(response.errorBody()!!.charStream())
                         Toast.makeText(activity, errorBody.message, Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(activity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+                    Snackbar.make(appActivity.binding.frameLayoutApp, "Une erreur est survenu", Snackbar.LENGTH_SHORT).show()
                 } finally {
                     binding.threadSwipeLoad.isRefreshing = false
                 }
             }
 
             override fun onFailure(call: Call<List<Post>>, t: Throwable) {
-                Toast.makeText(activity, "Une erreur est survenu", Toast.LENGTH_SHORT).show()
+                Snackbar.make(appActivity.binding.frameLayoutApp, "Une erreur est survenu", Snackbar.LENGTH_SHORT).show()
                 binding.threadSwipeLoad.isRefreshing = false
             }
         })

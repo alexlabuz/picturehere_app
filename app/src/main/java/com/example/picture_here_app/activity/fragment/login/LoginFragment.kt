@@ -10,16 +10,14 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import com.example.picture_here_app.R
-import com.example.picture_here_app.activity.entity.WebServiceInterface
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.activity.LoginActivity
 import com.example.picture_here_app.activity.entity.login.Token
 import com.example.picture_here_app.activity.entity.login.UserLogin
 import com.example.picture_here_app.activity.entity.response.MessageResponse
 import com.example.picture_here_app.activity.service.RetrofitSingleton
+import com.example.picture_here_app.activity.service.MessageResponseGet
 import com.example.picture_here_app.databinding.FragmentLoginBinding
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Response
 import java.lang.Exception
@@ -42,13 +40,17 @@ class LoginFragment : Fragment() {
 
     private fun loginBtnClick(){
         displayMessage("")
-        loginActivity.load(true)
         val userLogin = UserLogin();
         userLogin.username = binding.editLoginUsername.text.toString()
         userLogin.password = binding.editLoginPassword.text.toString()
 
-        val callLogin = RetrofitSingleton.getRetrofit().login(userLogin)
+        login(userLogin)
+    }
 
+    private fun login(userLogin: UserLogin){
+        loginActivity.load(true)
+
+        val callLogin = RetrofitSingleton.getRetrofit().login(userLogin)
         callLogin.enqueue(object : retrofit2.Callback<Token> {
             override fun onResponse(call: Call<Token>, response: Response<Token>) {
                 try{
@@ -59,9 +61,7 @@ class LoginFragment : Fragment() {
                             ?.apply()
                         openAppActivity()
                     }else{
-                        val gson = Gson()
-                        val type = object : TypeToken<MessageResponse>() {}.type
-                        val errorBody: MessageResponse = gson.fromJson(response.errorBody()!!.charStream(), type)
+                        val errorBody: MessageResponse = MessageResponseGet.getMessageResponse(response.errorBody()!!.charStream())
                         displayMessage(errorBody.message, true)
                     }
                 } catch (e: Exception) {
