@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -194,7 +193,7 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                 if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     openFilePicker(null)
                 }else{
-                    Toast.makeText(this, "Permission de stockage non autorisé", Toast.LENGTH_SHORT).show()
+                    Snackbar.make(binding.frameLayoutApp, "Permission de stockage non autorisé", Snackbar.LENGTH_SHORT).show()
                 }
             }
         }
