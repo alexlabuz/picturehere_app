@@ -9,5 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="danger">#fa5858</color>
-    <color name="good">#58fa58</color>
+    <color name="good">#58bf58</color>
+    <color name="blue_here">#3973EA</color>
+    <color name="background">#F0F0F0</color>
 </resources>

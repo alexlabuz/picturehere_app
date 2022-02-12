@@ -24,14 +24,12 @@ import com.example.picture_here_app.activity.entity.user.User
 import com.example.picture_here_app.activity.fragment.app.ProfilFragment
 import com.example.picture_here_app.activity.fragment.app.ThreadFragment
 import com.example.picture_here_app.activity.service.GetFile
-import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.activity.service.MessageResponseGet
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.ActivityAppBinding
 import com.example.picture_here_app.databinding.DialogSendPostBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -68,9 +66,10 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
         setContentView(binding.root)
     }
 
-    fun logout(){
+    fun logout(expireToken: Boolean = false){
         preference.edit().remove(getString(R.string.token)).apply()
         val intent = Intent(this, LoginActivity::class.java)
+        intent.putExtra(getString(R.string.expired_token), expireToken)
         startActivity(intent)
         finish()
     }
@@ -164,9 +163,8 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
                         if (appStart) loadFragment(threadFragment)
                     }else{
                         val errorBody: MessageResponse = MessageResponseGet.getMessageResponse(response.errorBody()!!.charStream())
-                        if(errorBody.message == "Expired JWT Token"){
-                            Snackbar.make(binding.frameLayoutApp, "Vous avez été déconnecté", Snackbar.LENGTH_SHORT).show()
-                            logout()
+                        if(errorBody.message == "Expired JWT Token" || errorBody.message == "Invalid credentials."){
+                            logout(true)
                         }else{
                             Snackbar.make(binding.frameLayoutApp, errorBody.message, Snackbar.LENGTH_SHORT).show()
                         }
@@ -210,6 +208,11 @@ class AppActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSe
             return loadFragment(profilFragment)
         }
         return false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getData()
     }
     // endregion
 }

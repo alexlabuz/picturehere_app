@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -12,12 +11,12 @@ import com.example.picture_here_app.R
 import com.example.picture_here_app.activity.activity.LoginActivity
 import com.example.picture_here_app.activity.entity.login.UserRegister
 import com.example.picture_here_app.activity.entity.response.MessageResponse
-import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.activity.service.MessageResponseGet
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentRegisterBinding
+import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Response
-import java.lang.Exception
 
 class RegisterFragment : Fragment(){
     private lateinit var binding: FragmentRegisterBinding
@@ -39,8 +38,8 @@ class RegisterFragment : Fragment(){
         if(binding.editRegisterPassword.text.toString() != binding.editRegisterPasswordConfirm.text.toString()) {
             return displayMessage("Les 2 mots de passes ne corresponde pas", true)
         }
-        if(binding.editRegisterPassword.text.length < 8){
-            return displayMessage("Le mot de passe doit faire 8 caractères minimum", true)
+        if(binding.editRegisterPassword.text.length < 6){
+            return displayMessage("Le mot de passe doit faire 6 caractères minimum", true)
         }
 
         val userRegister = UserRegister()
@@ -62,7 +61,10 @@ class RegisterFragment : Fragment(){
                         val message: MessageResponse? = response.body()
                         loginActivity.loadFragment(loginActivity.loginFragment)
                         emptyEditText()
-                        Toast.makeText(activity, message?.message ?: "Inscription terminée", Toast.LENGTH_LONG).show()
+                        Snackbar
+                            .make(loginActivity.binding.frameLayoutLogin, message?.message ?: "Inscription terminée", Snackbar.LENGTH_LONG)
+                            .setBackgroundTint(ResourcesCompat.getColor(loginActivity.resources, R.color.good, null))
+                            .show()
                     }else{
                         val errorBody: MessageResponse = MessageResponseGet.getMessageResponse(response.errorBody()!!.charStream())
                         displayMessage(errorBody.message, true)

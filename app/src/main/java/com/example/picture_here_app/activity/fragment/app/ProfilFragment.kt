@@ -17,8 +17,8 @@ import com.example.picture_here_app.activity.activity.AccountActivity
 import com.example.picture_here_app.activity.activity.AppActivity
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
-import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.activity.service.MessageResponseGet
+import com.example.picture_here_app.activity.service.RetrofitSingleton
 import com.example.picture_here_app.databinding.FragmentProfilBinding
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
@@ -36,7 +36,7 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClick
         binding = FragmentProfilBinding.inflate(inflater)
         appActivity = activity as AppActivity
 
-        binding.profilBtnLogout.setOnClickListener { appActivity.logout() }
+        binding.profilBtnLogout.setOnClickListener { clickButtonLogout() }
         binding.profilBtnAccount.setOnClickListener { openAccountSetting() }
 
         onRefresh()
@@ -50,9 +50,17 @@ class ProfilFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, OnClick
         return binding.root
     }
 
+    private fun clickButtonLogout(){
+        AlertDialog.Builder(activity)
+            .setTitle("Se deconnecter ?")
+            .setMessage("Voulez-vous vous déconnecter ?")
+            .setPositiveButton("Se déconecter") { _, _ -> appActivity.logout() }
+            .setNegativeButton("Annuler", null)
+            .show()
+    }
+
     @SuppressLint("SetTextI18n")
     fun getDataProfil(){
-        appActivity.getData()
         val simpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("fr"))
         binding.profilTextPseudo.text = appActivity.user.utilisateur.profil.pseudo
         binding.profilDateDateRegister.text = "Inscrit le "+simpleDateFormat.format(appActivity.user.utilisateur.profil.dateInscription)

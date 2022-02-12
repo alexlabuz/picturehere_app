@@ -5,9 +5,9 @@ import com.example.picture_here_app.activity.entity.login.UserLogin
 import com.example.picture_here_app.activity.entity.login.UserRegister
 import com.example.picture_here_app.activity.entity.post.Post
 import com.example.picture_here_app.activity.entity.response.MessageResponse
+import com.example.picture_here_app.activity.entity.user.UpdateProfil
 import com.example.picture_here_app.activity.entity.user.User
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -37,4 +37,11 @@ interface WebServiceInterface {
         @Part picture: MultipartBody.Part?,
         @Part("post") post: Post
     ) : Call<MessageResponse>
+
+    @POST("api/profil/update")
+    fun updateprofil(@Header("Authorization") authorization: String, @Body updateProfil: UpdateProfil) : Call<MessageResponse>
+
+    @Multipart
+    @POST("api/user/delete")
+    fun deleteProfil(@Header("Authorization") authorization: String, @Part("id") id: Int) : Call<MessageResponse>
 }
