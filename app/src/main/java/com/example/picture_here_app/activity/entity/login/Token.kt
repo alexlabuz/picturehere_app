@@ -1,7 +1,8 @@
 package com.example.picture_here_app.activity.entity.login
 
-import java.io.Serializable
+import androidx.annotation.Keep
 
-class Token : Serializable{
+@Keep
+class Token{
     lateinit var token : String
 }
